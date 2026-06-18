@@ -6,18 +6,26 @@ export default function CreatePropertyPage() {
 
   const [extraFields, setExtraFields] = useState<{ key: string; value: string }[]>([])
 
-  const [formData, setFormData] = useState({
+const [formData, setFormData] = useState<{
+    propertyName: string
+    developerName: string
+    shortDescription: string
+    brokerName: string
+    brokerEmail: string
+    brokerPhone: string
+    buyerAccess: string
+    contentMode: string
+    thumbnail: File | null
+    pdfs: File[]
+  }>({
     propertyName: "",
     developerName: "",
     shortDescription: "",
-
     brokerName: "",
     brokerEmail: "",
     brokerPhone: "",
-
     buyerAccess: "Public",
     contentMode: "AI Brief",
-
     thumbnail: null,
     pdfs: [],
   })
