@@ -7,9 +7,16 @@ import { supabase } from "@/lib/supabase"
 export default function DeveloperPage() {
   const [properties, setProperties] = useState<any[]>([])
 
-  useEffect(() => {
+useEffect(() => {
     const fetchProperties = async () => {
-      const { data, error } = await supabase.from("properties").select("*")
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { data, error } = await supabase
+        .from("properties")
+        .select("*")
+        .eq("developer_id", user.id)
+
       if (!error) setProperties(data || [])
     }
     fetchProperties()

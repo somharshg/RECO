@@ -21,39 +21,11 @@ export default function Home() {
           Document → Intelligence → Trusted Conversation
         </p>
 
-        <div className="grid md:grid-cols-3 gap-6">
-
-          <Link href="/developer" className="border border-zinc-800 rounded-3xl p-8 hover:border-[#C8A76A] transition">
-            <h3 className="text-xl font-semibold mb-2">
-              Developer
-            </h3>
-
-            <p className="text-zinc-400 text-sm">
-              Create and manage properties
-            </p>
-          </Link>
-
-          <Link href="/broker" className="border border-zinc-800 rounded-3xl p-8 hover:border-[#C8A76A] transition">
-            <h3 className="text-xl font-semibold mb-2">
-              Broker
-            </h3>
-
-            <p className="text-zinc-400 text-sm">
-              Access assigned properties
-            </p>
-          </Link>
-
-          <Link href="/buyer" className="border border-zinc-800 rounded-3xl p-8 hover:border-[#C8A76A] transition">
-            <h3 className="text-xl font-semibold mb-2">
-              Buyer
-            </h3>
-
-            <p className="text-zinc-400 text-sm">
-              Explore properties
-            </p>
-          </Link>
-
-        </div>
+        <Link href="/login" className="inline-block border border-[#C8A76A] rounded-3xl px-10 py-5 hover:bg-[#C8A76A] hover:text-black transition">
+          <h3 className="text-xl font-semibold">
+            Sign In to Continue
+          </h3>
+        </Link>
 
       </div>
 

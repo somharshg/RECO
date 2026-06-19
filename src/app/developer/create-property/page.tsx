@@ -1,8 +1,14 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useSearchParams, useRouter } from "next/navigation"
+import { supabase } from "@/lib/supabase"
 
 export default function CreatePropertyPage() {
+
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const editId = searchParams.get("edit")
 
   const [extraFields, setExtraFields] = useState<{ key: string; value: string }[]>([])
 
@@ -29,6 +35,33 @@ const [formData, setFormData] = useState<{
     thumbnail: null,
     pdfs: [],
   })
+
+  useEffect(() => {
+    if (!editId) return
+
+    const fetchProperty = async () => {
+      const { data, error } = await supabase
+        .from("properties")
+        .select("*")
+        .eq("id", editId)
+        .single()
+
+      if (error || !data) return
+
+      setFormData((prev) => ({
+        ...prev,
+        propertyName: data.property_name || "",
+        developerName: data.developer_name || "",
+        shortDescription: data.short_description || "",
+        brokerName: data.broker_name || "",
+        brokerEmail: data.broker_email || "",
+        brokerPhone: data.broker_phone || "",
+        buyerAccess: data.buyer_access || "Public",
+        contentMode: data.content_mode || "AI Brief",
+      }))
+    }
+    fetchProperty()
+  }, [editId])
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -67,7 +100,14 @@ const [formData, setFormData] = useState<{
 
   const handleSubmit = async () => {
     try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        alert("You must be logged in to create a property.")
+        return
+      }
+
       const data = new FormData()
+      data.append("developerId", user.id)
       data.append("propertyName", formData.propertyName)
       data.append("developerName", formData.developerName)
       data.append("shortDescription", formData.shortDescription)
@@ -79,12 +119,16 @@ const [formData, setFormData] = useState<{
       if (formData.thumbnail) data.append("thumbnail", formData.thumbnail)
       for (const pdf of formData.pdfs) data.append("pdfs", pdf)
 
-      const res = await fetch("/api/create-property", { method: "POST", body: data })
+      const endpoint = editId ? "/api/update-property" : "/api/create-property"
+      if (editId) data.append("propertyId", editId)
+
+      const res = await fetch(endpoint, { method: "POST", body: data })
       const json = await res.json()
 
       if (!res.ok) throw new Error(json.error)
 
-      alert("Property saved successfully!")
+      alert(editId ? "Property updated successfully!" : "Property saved successfully!")
+      if (editId) router.push(`/developer/property/${editId}`)
     } catch (err) {
       console.error(err)
       alert("Something went wrong. Check console.")
@@ -97,11 +141,11 @@ const [formData, setFormData] = useState<{
       <div className="max-w-4xl mx-auto">
 
         <h1 className="text-5xl font-bold mb-3">
-          Create Property
+          {editId ? "Edit Property" : "Create Property"}
         </h1>
 
         <p className="text-zinc-400 mb-10">
-          Add a new property to RECO
+          {editId ? "Update your property details" : "Add a new property to RECO"}
         </p>
 
         <div className="space-y-6">
@@ -273,7 +317,7 @@ const [formData, setFormData] = useState<{
             onClick={handleSubmit}
             className="bg-[#C8A76A] text-black px-6 py-3 rounded-xl font-semibold"
           >
-            Create Property
+            {editId ? "Update Property" : "Create Property"}
           </button>
 
         </div>

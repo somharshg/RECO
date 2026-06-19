@@ -55,6 +55,7 @@ export async function POST(req: NextRequest) {
 
     // 3. Insert row
     const { error } = await admin.from("properties").insert({
+      developer_id: body.get("developerId"),
       property_name: body.get("propertyName"),
       developer_name: body.get("developerName"),
       short_description: body.get("shortDescription"),
