@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
+import { extractTextFromPDF } from "@/lib/extract-pdf"
 
 export async function POST(req: NextRequest) {
   try {
@@ -55,6 +56,7 @@ export async function POST(req: NextRequest) {
     const validPdfs = pdfs.filter((p) => p.size > 0)
     if (validPdfs.length > 0) {
       const pdfUrls: string[] = []
+      let extractedText = ""
       for (const pdf of validPdfs) {
         const buffer = await pdf.arrayBuffer()
         const { data, error } = await admin.storage
@@ -67,8 +69,13 @@ export async function POST(req: NextRequest) {
           .from("properties")
           .getPublicUrl(data.path)
         pdfUrls.push(urlData.publicUrl)
+
+        const text = await extractTextFromPDF(buffer, pdf.name)
+        console.log(`[PDF] ${pdf.name}: extracted ${text.length} chars`)
+        extractedText += `\n\n--- ${pdf.name} ---\n${text}`
       }
       updateData.pdf_urls = pdfUrls.join(",")
+      updateData.extracted_text = extractedText
     }
 
     const { error } = await admin

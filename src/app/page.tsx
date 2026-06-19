@@ -1,4 +1,8 @@
-import Link from "next/link";
+"use client"
+
+import Link from "next/link"
+import PropertyCarousel from "@/components/PropertyCarousel"
+
 export default function Home() {
   return (
     <main className="min-h-screen bg-[#0A0A0A] text-white flex flex-col items-center justify-center px-6">
@@ -28,6 +32,8 @@ export default function Home() {
         </Link>
 
       </div>
+
+      <PropertyCarousel />
 
     </main>
   );

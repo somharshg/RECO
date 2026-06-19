@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
+import { extractTextFromPDF } from "@/lib/extract-pdf"
 
 export async function POST(req: NextRequest) {
   try {
@@ -35,12 +36,14 @@ export async function POST(req: NextRequest) {
       thumbnailUrl = urlData.publicUrl
     }
 
-    // 2. Upload PDFs
+    // 2. Upload PDFs and extract text
     const pdfUrls: string[] = []
+    let extractedText = ""
     const pdfs = body.getAll("pdfs") as File[]
     for (const pdf of pdfs) {
       if (pdf.size === 0) continue
       const buffer = await pdf.arrayBuffer()
+
       const { data, error } = await admin.storage
         .from("properties")
         .upload(`pdfs/${Date.now()}_${pdf.name}`, buffer, {
@@ -51,6 +54,10 @@ export async function POST(req: NextRequest) {
         .from("properties")
         .getPublicUrl(data.path)
       pdfUrls.push(urlData.publicUrl)
+
+      const text = await extractTextFromPDF(buffer, pdf.name)
+      console.log(`[PDF] ${pdf.name}: extracted ${text.length} chars`)
+      extractedText += `\n\n--- ${pdf.name} ---\n${text}`
     }
 
     // 3. Insert row
@@ -66,6 +73,7 @@ export async function POST(req: NextRequest) {
       content_mode: body.get("contentMode"),
       thumbnail_url: thumbnailUrl,
       pdf_urls: pdfUrls.join(","),
+      extracted_text: extractedText,
     })
 
     if (error) throw error
