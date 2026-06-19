@@ -1,10 +1,10 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 
-export default function CreatePropertyPage() {
+function CreatePropertyForm() {
 
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -325,5 +325,13 @@ const [formData, setFormData] = useState<{
       </div>
 
     </main>
+  )
+}
+
+export default function CreatePropertyPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#0A0A0A]" />}>
+      <CreatePropertyForm />
+    </Suspense>
   )
 }
