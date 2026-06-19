@@ -1,4 +1,4 @@
-import pdfParse from "pdf-parse"
+import { PDFParse } from "pdf-parse"
 import { createCanvas } from "canvas"
 import { getDocument, GlobalWorkerOptions } from "pdfjs-dist"
 import Tesseract from "tesseract.js"
@@ -14,7 +14,9 @@ export async function extractTextFromPDF(
 ): Promise<string> {
   // Fast path: pdf-parse handles text-layer PDFs directly
   try {
-    const parsed = await pdfParse(Buffer.from(buffer))
+    const parser = new PDFParse({ data: Buffer.from(buffer) })
+    const parsed = await parser.getText()
+    await parser.destroy()
     const text = parsed.text.trim()
     if (text.length >= MIN_TEXT_CHARS) {
       return parsed.text
@@ -35,7 +37,7 @@ export async function extractTextFromPDF(
       const canvas = createCanvas(viewport.width, viewport.height)
       const ctx = canvas.getContext("2d")
 
-      await page.render({ canvasContext: ctx as any, viewport }).promise
+      await page.render({ canvasContext: ctx as any, canvas: canvas as any, viewport }).promise
 
       const imageBuffer = canvas.toBuffer("image/png")
       const { data: { text } } = await Tesseract.recognize(imageBuffer, "eng")
